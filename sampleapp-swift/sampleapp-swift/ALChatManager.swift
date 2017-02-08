@@ -23,13 +23,27 @@ class ALChatManager: NSObject {
     init(applicationKey: NSString) {
         
         ALUserDefaultsHandler.setApplicationKey(applicationKey as String)
+        ALUserDefaultsHandler.setBASEURL("http://192.168.2.3:8080")
     }
     
     // ----------------------
     // Call This at time of your app's user authentication OR User registration.
     // This will register your User at applozic server.
     //----------------------
-    
+    func getToken(_ userId: String, password: String, completion: @escaping (_ error: Error?)-> Void) {
+        let theUrlString = ALUserDefaultsHandler.getBASEURL() + "/rest/ws/token";
+        
+        let postdata = try? JSONSerialization.data(withJSONObject: ["userId":userId,"password":password], options: JSONSerialization.WritingOptions.init(rawValue: 0))
+        let theParamString = String.init(data: postdata!, encoding: String.Encoding.utf8)
+        let theRequest = ALRequestHandler.createPOSTRequest(withUrlString: theUrlString, paramString: theParamString)
+        ALResponseHandler.processRequest(theRequest, andTag: "GET TOKEN", withCompletionHandler: { (token,error) in
+            if (error == nil){
+                ALUserDefaultsHandler.setPassword(token as! String)
+                ALUserDefaultsHandler.setUserAuthenticationTypeId(Int16(APPLOZIC.rawValue))
+            }
+            completion(error)
+        })
+    }
      func registerUser(_ alUser: ALUser) {
         
         let alChatLauncher: ALChatLauncher = ALChatLauncher(applicationId: getApplicationKey() as String)

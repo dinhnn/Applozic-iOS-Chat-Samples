@@ -54,14 +54,16 @@ class AppLogicLoginViewController: UIViewController {
 
         if (!((password.text?.isEmpty)!)){
             alUser.password = password.text
-            ALUserDefaultsHandler.setPassword(alUser.password)
+            //ALUserDefaultsHandler.setPassword(alUser.password)
         }
         
         let chatManager = ALChatManager(applicationKey: "applozic-sample-app")
-         chatManager.registerUser(alUser) { (response, error) in
-            
-            let viewController:UIViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "LaunchChatFromSimpleViewController") as UIViewController
-            self.present(viewController, animated:true, completion: nil)
+        chatManager.getToken(alUser.userId, password: alUser.password) {
+            error in
+            chatManager.registerUser(alUser) { (response, error) in
+                let viewController:UIViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "LaunchChatFromSimpleViewController") as UIViewController
+                self.present(viewController, animated:true, completion: nil)
+            }
         }
     }
     
